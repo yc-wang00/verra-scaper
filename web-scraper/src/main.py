@@ -21,7 +21,7 @@ options.add_argument("headless")
 #                                               Web Scrapper Main Script                                               #
 # ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
 
-df = pd.read_excel(conf_mgr.path_data / "missing.xlsx", sheet_name="Results")
+df = pd.read_excel(conf_mgr.path_data / "allprojects.xlsx", sheet_name="Results")
 
 count = 0
 
@@ -50,7 +50,7 @@ for id, name in zip(df["ID"], df["Name"]):
         logger.debug(f"raw_content: {raw_content}")
 
         # Save the contents to a text file with name as the project id
-        with open(conf_mgr.path_data / f"{id}.txt", "w") as f:
+        with open(conf_mgr.path_results / f"{id}.txt", "w") as f:
             f.write(raw_content)
     except Exception as e:
         logger.error(f"Failed to scrape {name} with ID {id}. Error: {e}")
