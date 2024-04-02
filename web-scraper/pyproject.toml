@@ -1,0 +1,182 @@
+# This file is used to configure all tools used in the project. 
+
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
+#                                                Project Configuration                                                 #
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
+
+[project]
+name = "web_scrapper"
+version = "0.0.1"
+description = "A web scrapper for macquarie demo"
+authors = [{name = "Yicheng", email="yicheng.wang.2023@gmail.com"}]
+readme = "README.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]  # list of folders that contain the packages (["."] by default)
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
+#                                                        Format                                                        #
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
+
+# ────────────────────────────────────────────────────── Isort ─────────────────────────────────────────────────────── #
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 120
+profile = "black"
+
+# ───────────────────────────────────────────────── Black Formatter ────────────────────────────────────────────────── #
+
+[tool.black]
+exclude = '''
+(
+      tests/data
+)
+'''
+verbose = 1
+line-length = 120
+# --check and diff options are commented in order to provide them over the command line, to make invocation more flexible
+# and being able to execute format checks and auto-formatting with two different commands.
+#--check = "yes"
+#diff = "y"
+color = true
+target-version = ["py310"]
+
+
+# ─────────────────────────────────────────────────── Ruff Linter ──────────────────────────────────────────────────── #
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = ["E4", "E7", "E9", "F"]
+ignore = []
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+# ─────────────────────────────────────────────────── Mypy Linter ──────────────────────────────────────────────────── #
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+warn_untyped_fields = true
+
+[tool.mypy]
+python_version = "3.10"
+files = [
+    "src", "tests",
+]
+exclude = "tests/data"
+disable_error_code = "attr-defined"
+plugins = [
+    "pydantic.mypy",
+]
+ignore_missing_imports = true
+warn_redundant_casts = true
+warn_unused_ignores = false
+check_untyped_defs = true
+no_implicit_reexport = true
+disallow_untyped_defs = true
+
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
+#                                                       Testing                                                        #
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+python_files = [
+    "test_*.py",
+]
+markers = [
+    "slow: Indicates that the test may take time to complete (disable with '-m \"not slow\"')",
+    "benchmark: Indicates that the test is a benchmark (disable with '-m \"not benchmark\"')",
+    "network: A test requires network access",
+    "cache: Test requires network access if the cache is not populated"
+]
+addopts = [
+    "-p no:cacheprovider",
+    "-ra",
+    "--verbose",
+    "--cov-config=.coveragerc",
+    "--cov=src",
+    "--cov-report=term",
+    "--cov-report=html:docs/coverage",
+    "--cov-report=xml:docs/coverage/coverage.xml",
+    "--verbose",
+    "--cache-clear",
+    "-m", "not slow",
+]
+
+[tool.pytest_env]
+CACHE_DIR_OVERRIDE = "~/.iris_cache"
+TAKEOFF_READER_ID = "test"
+TAKEOFF_CONSUMER_GROUP = "primary"
+TAKEOFF_LOG_LEVEL="TRACE"
+
+
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "@abstractmethod",
+]
+

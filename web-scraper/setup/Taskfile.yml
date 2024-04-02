@@ -1,0 +1,75 @@
+version: '3'
+
+silent: true
+
+vars:
+  SETUP_PATH: '{{.TASKFILE_DIR}}'
+  REQ_FILES: '{{.SETUP_PATH}}/requirements.txt'
+  REQ_FILES_DEV: '{{.SETUP_PATH}}/requirements_develop.txt'
+  SEP_LINE: '──────────────────────────────────────────────────────────────────────────────────────────────────────────'
+
+env: 
+  RED: '\033[1;31m'
+  NC: '\033[0m'
+
+tasks:
+  print-format:
+    desc: "Print formatted message"
+    vars:
+      MESSAGE: '{{default "HI" .MESSAGE}}'
+    cmds:
+      - echo -e '{{.SEP_LINE}}\n───{{.MESSAGE}}\n{{.SEP_LINE}}'
+
+  install-req-dev:
+    desc: "Install all the requirements in the activated local environment."
+    method: none
+    sources:
+      - '{{.REQ_FILES_DEV}}'
+    cmds:
+      - echo -e '{{.REQ_FILES_DEV}}'
+      - for: sources
+        cmd: | 
+          MESSAGE="Installing {{ .ITEM }}..." task print-format
+          pip install -U -r {{ .ITEM }} || (echo -e "${RED}Failed to install {{ .ITEM }}${NC}" && exit 1)
+      - task: print-format
+        vars: { MESSAGE: "Successfully installed all requirements!" }
+      - task: print-format
+        vars: { MESSAGE: "Task completed!" }
+
+  install-req:
+    desc: "Install all the requirements in the activated local environment."
+    method: none
+    sources:
+      - '{{.REQ_FILES}}'
+      - '{{.REQ_FILES_DEV}}'
+    cmds:
+      - echo -e '{{.REQ_FILES}}\n{{.REQ_FILES_DEV}}'
+      - for: sources
+        cmd: | 
+          MESSAGE="Installing {{ .ITEM }}..." task print-format
+          pip install -U -r {{ .ITEM }} || (echo -e "${RED}Failed to install {{ .ITEM }}${NC}" && exit 1)
+      - task: print-format
+        vars: { MESSAGE: "Successfully installed all requirements!" }
+      - task: print-format
+        vars: { MESSAGE: "Task completed!" }
+        
+  remove-req:
+    desc: "Uninstall all the libraries installed in the Python environment."
+    method: none
+    sources:
+      - '{{.REQ_FILES}}'
+      - '{{.REQ_FILES_DEV}}'
+    cmds:
+      - for: sources
+        cmd: | 
+          MESSAGE="Uninstalling {{ .ITEM }}..." task print-format
+          pip uninstall -y -r {{ .ITEM }} || (echo -e "${RED}Failed to uninstall {{ .ITEM }}${NC}" && exit 1)
+      - task: print-format
+        vars: { MESSAGE: "Successfully uninstalled all requirements!" }
+
+  cache-purge:
+    desc: "Remove all items from the pip cache."
+    cmds:
+    - task: print-format
+      vars: { MESSAGE: "Removing all items from the pip cache..." }
+    - pip cache purge

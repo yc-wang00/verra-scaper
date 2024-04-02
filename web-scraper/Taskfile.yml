@@ -1,0 +1,167 @@
+version: '3'
+
+# --------------------------------------------------------------------------------------------------------------------
+# --- PATHS
+# --------------------------------------------------------------------------------------------------------------------
+
+vars:
+  ROOT_PATH: '{{.TASKFILE_DIR}}'
+  TOML_CONF_PATH: '{{.TASKFILE_DIR}}/pyproject.toml'
+  SETUP_PATH: '{{.TASKFILE_DIR}}/setup'
+  SRC_PATH: '{{.TASKFILE_DIR}}/src'
+  TESTS_PATH: '{{.TASKFILE_DIR}}/tests'
+  LINT_PATHS: '{{.SRC_PATH}}'
+  SEP_LINE: '──────────────────────────────────────────────────────────────────────────────────────────────────────────'
+
+# --------------------------------------------------------------------------------------------------------------------
+# --- CONFIGURATION
+# --------------------------------------------------------------------------------------------------------------------
+silent: true
+
+includes:
+  setup: 
+    taskfile: ./setup/Taskfile.yml
+    dir: ./setup
+    internal: true
+
+tasks:
+  # ------------------------------------------- Default -------------------------------------------- #
+  print-format:
+    desc: "Print formatted message"
+    vars:
+      MESSAGE: '{{default "HI" .MESSAGE}}'
+    cmds:
+      - echo -e '{{.SEP_LINE}}\n───{{.MESSAGE}}\n{{.SEP_LINE}}'
+    internal: true
+
+  # ------------------------------------------- Cleaning ------------------------------------------- #
+  clean-pyc:
+    desc: "Remove Python file artifacts."
+    cmds:
+      - find {{.ROOT_PATH}} -name '*.pyc' -exec rm -f {} + 
+      - find {{.ROOT_PATH}} -name '*.pyo' -exec rm -f {} +
+      - find {{.ROOT_PATH}} -name '*~' -exec rm -f {} +
+    silent: true
+
+  clean-lint:
+    desc: "Remove the temporary files generated when executing the linting."
+    cmds:
+      - find {{.ROOT_PATH}} -name '.mypy_cache' -exec rm -rf {} +
+      - find {{.ROOT_PATH}} -name '.ruff_cache' -exec rm -rf {} +
+      - find {{.ROOT_PATH}} -name '.benchmarks' -exec rm -rf {} +
+    silent: true
+
+  clean-test:
+    desc: "Remove the temporary files generated when executing the tests."
+    cmds:
+      - find {{.ROOT_PATH}} -name '.pytest_cache' -exec rm -rf {} +
+      - find {{.ROOT_PATH}} -name '.coverage*' ! -name ".coveragerc" -exec rm -rf {} +
+    silent: true
+
+  clean:
+    desc: "Clean up project."
+    cmds:
+      - task: clean-pyc
+      - task: clean-lint
+      - task: clean-test
+
+  # ------------------------------------------- Testing -------------------------------------------- #
+  test:
+    desc: "Run tests quickly with the default Python."
+    cmds:
+      - PYTHONPATH={{.SRC_PATH}} pytest {{.CLI_ARGS}} -rfs {{.TESTS_PATH}} || true
+      - task: clean-test
+      - echo -e 'Task completed successfully.\n'
+
+  docker-test:
+    desc: "Run the unit tests in a built docker container."
+    cmds: 
+      - ../devops/test-unit.sh -d gpu {{.CLI_ARGS}}
+
+  # ------------------------------------------- Linting -------------------------------------------- #
+  lint:
+    desc: "Check style with ruff."
+    cmds:
+      - task: print-format
+        vars:
+          MESSAGE: "Checking the project code style [ruff]"
+      - ruff --config={{.TOML_CONF_PATH}} {{.LINT_PATHS}} || exit 1
+      - task: clean-lint
+      - echo -e 'Task completed successfully.\n'
+    silent: true
+
+  type-check:
+    desc: "Run type checking using mypy."
+    cmds:
+      - task: print-format
+        vars:
+          MESSAGE: "Checking the project code style [mypy]"
+      - mypy {{.LINT_PATHS}} --config-file {{.TOML_CONF_PATH}} || exit 1
+      - task: clean-lint
+      - echo -e 'Task completed successfully.\n'
+    silent: true
+
+  format-check:
+    desc: "Run format checks using black."
+    cmds:
+      - task: print-format
+        vars:
+          MESSAGE: "Checking the format of code files [black]"
+      - black {{.LINT_PATHS}} --check --diff --verbose --config {{.TOML_CONF_PATH}} || exit 1
+      - echo -e 'Task completed successfully.\n'
+    silent: true
+
+  format-apply:
+    desc: "Apply the black format to all the code."
+    cmds:
+      - task: print-format
+        vars:
+          MESSAGE: "Formatting code files [black]"
+      - black {{.LINT_PATHS}} --verbose --config {{.TOML_CONF_PATH}} || true
+      - task: print-format
+        vars:
+          MESSAGE: "Formatting code files [Ruff]"
+      - ruff --config={{.TOML_CONF_PATH}} {{.LINT_PATHS}} --fix || true
+      - echo -e 'Task completed successfully.\n'
+    silent: true
+
+  check-all:
+    desc: "Run all clean code checks."
+    cmds:
+      - task: format-check
+      - task: lint
+      - task: type-check
+
+  check-all-file:
+    desc: "Run all clean code checks and save the result to a file."
+    cmds:
+      - mv {{.CHECK_FILE}} {{.CHECK_BEFORE_FILE}} || true
+      - task: check-all
+
+  # -------------------------------------------- Setup --------------------------------------------- #
+  req-install:
+    desc: "Install all the requirements in the activated local environment."
+    cmds:
+      - task: setup:install-req
+
+  req-install-dev:
+    desc: "Install all the dev requirements in the activated local environment."
+    cmds:
+      - task: setup:install-req-dev
+
+  req-remove:
+    desc: "Uninstall all the libraries installed in the Python environment."
+    cmds:
+      - task: setup:remove-req
+
+  req-clean:
+    desc: "Remove all items from the pip cache."
+    cmds:
+      - task: setup:cache-purge
+
+  # ------------------------------------------- Run Main ------------------------------------------- #
+  
+  run:
+    desc: "Run python/main.py."
+    cmds:
+      - PYTHONPATH={{.SRC_PATH}} python {{.SRC_PATH}}/main.py

@@ -1,0 +1,20 @@
+# Necessary requirements for the application
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+# --------------------------------------------------------------------------------------------------------------------
+# --- Configuration:
+# --------------------------------------------------------------------------------------------------------------------
+
+# Data validation and settings management using Python type hinting.
+pydantic[dotenv]==2.5.1
+pydantic-settings==2.1.0
+
+# Python logging made (stupidly) simple. Loguru is a library which aims to bring enjoyable logging in Python.
+loguru==0.7.2
+
+pandas==2.2.0
+openpyxl==3.1.2
+selenium==4.17.2
+beautifulsoup4==4.12.3
+requests==2.31.0
+webdriver_manager==4.0.1
