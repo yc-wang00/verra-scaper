@@ -97,7 +97,7 @@ def import_data_to_weaviate(client, data):
     """Import the prepared data into Weaviate"""
     for obj in data:
         try:
-            client.data_object.create(data_object=obj, class_name="TEST")
+            client.data_object.create(data_object=obj, class_name="Registed_Metadata")
         except Exception as e:
             print(f"Error importing object with ID {obj['project_id']}: {str(e)}")
 
