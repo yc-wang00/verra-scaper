@@ -1,6 +1,7 @@
 """
 This module implements and instantiates the common configuration class used in the project.
 """
+
 # ───────────────────────────────────────────────────── imports ────────────────────────────────────────────────────── #
 
 import os
