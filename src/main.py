@@ -117,7 +117,6 @@ def main(scrape_summary=True, scrape_document_links=True) -> None:
                             writer.writerow([id, group_name, pdf_name, pdf_url, date_updated])
 
         except Exception as e:
-            raise e
             logger.error(f"Failed to scrape {name} with ID {id}. Error: {e}")
             failed_ids.append(id)
             failed_projects.append(name)
