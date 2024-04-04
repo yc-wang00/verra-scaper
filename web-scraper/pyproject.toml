@@ -7,7 +7,7 @@
 [project]
 name = "web_scrapper"
 version = "0.0.1"
-description = "A web scrapper for macquarie demo"
+description = "A web scrapper for Verified Carbon Standard (VCS) projects"
 authors = [{name = "Yicheng", email="yicheng.wang.2023@gmail.com"}]
 readme = "README.md"
 
