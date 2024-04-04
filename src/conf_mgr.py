@@ -36,6 +36,11 @@ class ConfManager:
     path_results: Path = path_project.joinpath("results")  # results folder
     path_results.mkdir(parents=True, exist_ok=True)  # create the directory if it doesn't exist
 
+    path_results_summary: Path = path_results.joinpath("summary")  # summary folder
+    path_results_summary.mkdir(parents=True, exist_ok=True)  # create the directory if it doesn't exist
+
+    path_results_csv: Path = path_results / "pdf_links.csv"  # csv file to store the pdf links
+
     # Configure the logger
     log_level = os.getenv("LOG_LEVEL", "INFO")  # Default to INFO if not set
 
