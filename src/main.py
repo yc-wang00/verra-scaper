@@ -19,6 +19,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from conf_mgr import conf_mgr
 
+# ────────────────────────────────────────────────── Global Config ─────────────────────────────────────────────────── #
+
 # Set options to run Chrome in headless mode
 options = webdriver.ChromeOptions()
 options.add_argument("headless")
