@@ -42,10 +42,6 @@ def main(scrape_summary=True, scrape_document_links=True) -> None:
     # Load the Excel file with the project IDs and Names
     df = pd.read_excel(conf_mgr.path_data / "registered.xlsx", sheet_name="Results")
 
-    # Set up the Chrome WebDriver
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
-
     failed_ids = []
     failed_projects = []
 
@@ -58,6 +54,10 @@ def main(scrape_summary=True, scrape_document_links=True) -> None:
         url = f"https://registry.verra.org/app/projectDetail/VCS/{id}"
 
         try:
+            # Set up the Chrome WebDriver
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=options)
+
             # Open the page
             driver.get(url)
 
@@ -117,6 +117,7 @@ def main(scrape_summary=True, scrape_document_links=True) -> None:
                             writer.writerow([id, group_name, pdf_name, pdf_url, date_updated])
 
         except Exception as e:
+            raise e
             logger.error(f"Failed to scrape {name} with ID {id}. Error: {e}")
             failed_ids.append(id)
             failed_projects.append(name)
