@@ -69,7 +69,7 @@ def main(scrape_summary=True, scrape_document_links=True) -> None:
                 logger.debug(f"raw_content: {raw_content}")
 
                 # Save the contents to a text file with name as the project id
-                with open(conf_mgr.path_results / f"{id}.txt", "w") as f:
+                with open(conf_mgr.path_results_summary / f"{id}.txt", "w") as f:
                     f.write(raw_content)
 
             # Scrape the document links
@@ -109,7 +109,7 @@ def main(scrape_summary=True, scrape_document_links=True) -> None:
                         date_updated = date.text
 
                         # Write the PDF link to a CSV file
-                        with open("pdf_links.csv", mode="a", newline="", encoding="utf-8") as file:
+                        with open(conf_mgr.path_results_csv, mode="a", newline="", encoding="utf-8") as file:
                             writer = csv.writer(file)
                             writer.writerow([id, group_name, pdf_name, pdf_url, date_updated])
 
@@ -133,7 +133,11 @@ def main(scrape_summary=True, scrape_document_links=True) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Web Scrapper")
     parser.add_argument(
-        "-ds", "--disable-summary", dest="disable_summary", action="store_true", help="No scraping of the summary"
+        "-ds",
+        "--disable-summary",
+        dest="disable_summary",
+        action="store_true",
+        help="No scraping of the summary content",
     )
     parser.add_argument(
         "-dd",
@@ -146,18 +150,13 @@ if __name__ == "__main__":
     if args.disable_summary and args.disable_document:
         logger.error("Both summary and document scraping are disabled. Exiting...")
         exit(1)
-    breakpoint()
 
-    # Create the CSV file to store the PDF links
-    with open("pdf_links.csv", mode="w", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
-        # Write the header row
-        writer.writerow(["Project ID", "Document Type", "Document Name", "Document URL", "Date Updated"])
+    if not args.disable_document:
+        # Create the CSV file to store the PDF links
+        with open(conf_mgr.path_results_csv, mode="w", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file)
+            # Write the header row
+            writer.writerow(["Project ID", "Document Type", "Document Name", "Document URL", "Date Updated"])
 
-    # if args.summary_only:
-    #     logger.info("Scraping only the summary")
-    #     scrape_summary()
-    # elif args.document_only:
-    #     logger.info("Scraping only the document links")
-    #     scrape_document_links()
-    # else:
+    # Run the main function
+    main(scrape_summary=not args.disable_summary, scrape_document_links=not args.disable_document)
