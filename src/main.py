@@ -57,11 +57,10 @@ def main(scrape_summary=True, scrape_document_links=True) -> None:
 
         url = f"https://registry.verra.org/app/projectDetail/VCS/{id}"
 
-
         try:
             # Open the page
             driver.get(url)
-            
+
             # Wait for the element to load
             element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "card-text")))
 
@@ -136,10 +135,12 @@ def main(scrape_summary=True, scrape_document_links=True) -> None:
     logger.info("Finished scraping all projects")
     logger.info("Processing failed projects...")
     # Save the failed projects to a CSV file
-    df = pd.DataFrame({
-        "ID": failed_ids,
-        "Name": failed_projects,
-    })
+    df = pd.DataFrame(
+        {
+            "ID": failed_ids,
+            "Name": failed_projects,
+        }
+    )
     df.to_csv(conf_mgr.path_results / "failed_projects.csv", index=False)
     logger.info("Failed projects saved to CSV file")
 
