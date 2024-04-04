@@ -4,9 +4,9 @@ This script serves as the main entry point for the web scrapper. It scrapes the 
 
 # ───────────────────────────────────────────────────── imports ────────────────────────────────────────────────────── #
 
-import time
-import csv
 import argparse
+import csv
+import time
 
 import pandas as pd
 from loguru import logger
@@ -60,7 +60,7 @@ def main(scrape_summary=True, scrape_document_links=True) -> None:
         try:
             # Wait for the element to load
             element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "card-text")))
-            
+
             # Scrape the summary content
             if scrape_summary:
                 # Scrape the contents of the element

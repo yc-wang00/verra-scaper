@@ -4,11 +4,11 @@ This file will be used to clean the data scraped from the website.
 This is a backup of the code that runs in the jupyter notebook. The code in the jupyter notebook is more interactive and easier to debug.
 """
 
-import pandas as pd
-from bs4 import BeautifulSoup
 import json
-import weaviate
 
+import pandas as pd
+import weaviate
+from bs4 import BeautifulSoup
 
 # ──────────────────────────────────────────────── Clean scraped data ──────────────────────────────────────────────── #
 
