@@ -162,6 +162,6 @@ tasks:
   # ------------------------------------------- Run Main ------------------------------------------- #
   
   run:
-    desc: "Run python/main.py."
+    desc: "Run python src/main.py."
     cmds:
       - PYTHONPATH={{.SRC_PATH}} python {{.SRC_PATH}}/main.py
