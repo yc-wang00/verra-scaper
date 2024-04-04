@@ -42,24 +42,26 @@ def main(scrape_summary=True, scrape_document_links=True) -> None:
     # Load the Excel file with the project IDs and Names
     df = pd.read_excel(conf_mgr.path_data / "registered.xlsx", sheet_name="Results")
 
-    count = 0
+    # Set up the Chrome WebDriver
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=options)
+
+    failed_ids = []
+    failed_projects = []
 
     # Iterate over the ID and Name columns
-    for id, name in zip(df["ID"], df["Name"]):
+    for count, (id, name) in enumerate(zip(df["ID"], df["Name"])):
 
         logger.info(f"====================Counter: {count}====================")
         logger.info(f"Scraping <{name}> with ID {id}")
 
         url = f"https://registry.verra.org/app/projectDetail/VCS/{id}"
 
-        # Set up the Chrome WebDriver
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=options)
-
-        # Open the page
-        driver.get(url)
 
         try:
+            # Open the page
+            driver.get(url)
+            
             # Wait for the element to load
             element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "card-text")))
 
@@ -117,6 +119,8 @@ def main(scrape_summary=True, scrape_document_links=True) -> None:
 
         except Exception as e:
             logger.error(f"Failed to scrape {name} with ID {id}. Error: {e}")
+            failed_ids.append(id)
+            failed_projects.append(name)
         finally:
             driver.quit()
 
@@ -125,11 +129,19 @@ def main(scrape_summary=True, scrape_document_links=True) -> None:
         # Wait for 3 seconds before scraping the next project
         time.sleep(5)
 
-        count += 1
-
         ### Uncomment the following line to scrape project by number ###
         # if count == 1:
         #     break
+
+    logger.info("Finished scraping all projects")
+    logger.info("Processing failed projects...")
+    # Save the failed projects to a CSV file
+    df = pd.DataFrame({
+        "ID": failed_ids,
+        "Name": failed_projects,
+    })
+    df.to_csv(conf_mgr.path_results / "failed_projects.csv", index=False)
+    logger.info("Failed projects saved to CSV file")
 
 
 if __name__ == "__main__":
