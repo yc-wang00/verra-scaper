@@ -38,7 +38,7 @@ def main(scrape_summary=True, scrape_document_links=True) -> None:
     """
 
     # Load the Excel file with the project IDs and Names
-    df = pd.read_excel(conf_mgr.path_data / "allprojects.xlsx", sheet_name="Results")
+    df = pd.read_excel(conf_mgr.path_data / "registered.xlsx", sheet_name="Results")
 
     count = 0
 
@@ -58,11 +58,11 @@ def main(scrape_summary=True, scrape_document_links=True) -> None:
         driver.get(url)
 
         try:
+            # Wait for the element to load
+            element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "card-text")))
+            
             # Scrape the summary content
             if scrape_summary:
-                # Wait for the element to load
-                element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "card-text")))
-
                 # Scrape the contents of the element
                 raw_content = element.get_attribute("innerHTML")
 
